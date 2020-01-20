@@ -1,0 +1,8 @@
+language: java
+
+jdk:
+  - oraclejdk9
+
+build:
+  ci:
+    - ant build
