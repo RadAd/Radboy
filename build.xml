@@ -1,0 +1,9 @@
+<project name="RadBoy" basedir="." default="build">
+
+    <property name="project.displayname"  value="RadBoy"/>
+    <property name="project.mainclass"    value="radsoft.radboy.Main"/>
+    <property name="project.version"      value="1.0"/>
+    
+    <import file="radjava/radjava.xml"/>
+    
+</project>
