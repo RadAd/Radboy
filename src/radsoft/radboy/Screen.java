@@ -9,7 +9,7 @@ import radsoft.radboy.core.*;
 import static radsoft.radboy.utils.ByteEx.*;
 import static radsoft.radboy.utils.Types.*;
 
-public class Screen implements Video.Lcd, KeyListener
+public class Screen implements Video.Lcd
 {
     JFrame frame = new JFrame("Gameboy");
     JComponent comp;
@@ -30,7 +30,7 @@ public class Screen implements Video.Lcd, KeyListener
     void open()
     {
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        frame.addKeyListener(this);
+        frame.addKeyListener(new JoypadKeyListener(joypad));
         {
             Graphics2D g2d = m_bmp.createGraphics();
             g2d.setBackground(Color.BLACK);
@@ -43,47 +43,6 @@ public class Screen implements Video.Lcd, KeyListener
         frame.getContentPane().add(comp);
         frame.pack();
         frame.setVisible(true);
-    }
-    
-    Joypad.Keys getKey(int code)
-    {
-        switch (code)
-        {
-        case KeyEvent.VK_Q:     return Joypad.Keys.Start;
-        case KeyEvent.VK_W:     return Joypad.Keys.Select;
-        case KeyEvent.VK_A:     return Joypad.Keys.A;
-        case KeyEvent.VK_S:     return Joypad.Keys.B;
-        case KeyEvent.VK_UP:    return Joypad.Keys.Up;
-        case KeyEvent.VK_DOWN:  return Joypad.Keys.Down;
-        case KeyEvent.VK_LEFT:  return Joypad.Keys.Left;
-        case KeyEvent.VK_RIGHT: return Joypad.Keys.Right;
-        default: return null;
-        }
-    }
-    
-    // KeyListener
-    
-    @Override
-    public void keyPressed(KeyEvent e)
-    {
-        //debug("keyPressed %s\n", e);
-        Joypad.Keys k = getKey(e.getKeyCode());
-        if (k != null)
-            joypad.setKey(k, true);
-    }
-    
-    @Override
-    public void keyReleased(KeyEvent e)
-    {
-        //debug("keyReleased %s\n", e);
-        Joypad.Keys k = getKey(e.getKeyCode());
-        if (k != null)
-            joypad.setKey(k, false);
-    }
-    
-    @Override
-    public void keyTyped(KeyEvent e)
-    {
     }
     
     //static final Color c[] = { new Color(0x08, 0x18, 0x20), Color.GREEN, Color.BLUE, Color.WHITE };
