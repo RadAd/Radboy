@@ -55,6 +55,11 @@ public class ScalableImagePane extends JPanel
         super.invalidate();
     }
 
+    protected Image getImage()
+    {
+        return master;
+    }
+
     public boolean isToFit()
     {
         return toFit;

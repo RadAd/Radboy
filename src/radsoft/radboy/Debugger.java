@@ -334,9 +334,7 @@ public class Debugger
                 }
             });
             sf.addKeyListener(new JoypadKeyListener(gb.joypad));
-            Screen s = new Screen();
-            gb.video.lcd = s;
-            sf.getContentPane().add(s.comp);
+            sf.getContentPane().add(new ScreenPane(gb.video));
             sf.pack();
         }
         sf.setVisible(true);

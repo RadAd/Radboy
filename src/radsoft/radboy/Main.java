@@ -65,9 +65,7 @@ public class Main
                 }
             });
             frame.addKeyListener(new JoypadKeyListener(gb.joypad));
-            Screen s = new Screen();
-            gb.video.lcd = s;
-            frame.getContentPane().add(s.comp);
+            frame.getContentPane().add(new ScreenPane(gb.video));
             frame.pack();
             frame.setVisible(true);
             ret = gb.run(null, mon);
