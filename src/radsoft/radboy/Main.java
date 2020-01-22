@@ -1,6 +1,7 @@
 package radsoft.radboy;
 
 import radsoft.radboy.Debugger;
+import radsoft.radboy.core.Gameboy;
 
 public class Main
 {
@@ -48,14 +49,39 @@ public class Main
         }
         
         byte ret = 0;
-        //System.out.println("Gameboy test");
-        Debugger dbg = new Debugger(rom, screen, bios);
-        dbg.trace = trace;
-        //dbg.gb.link.out = null;
-        if (rom == null || debug)
-            dbg.go();
+
+        if (screen && !debug)
+        {
+            Gameboy gb = new Gameboy(bios, rom);
+            GameboyMonitor mon = new GameboyMonitor();
+            javax.swing.JFrame frame = new javax.swing.JFrame("Gameboy");
+            frame.setDefaultCloseOperation(javax.swing.JFrame.DISPOSE_ON_CLOSE);
+            frame.addWindowListener(new java.awt.event.WindowAdapter() {
+                @Override
+                public void windowClosing(java.awt.event.WindowEvent e)
+                {
+                    mon.setBreak(true);
+                }
+            });
+            frame.addKeyListener(new JoypadKeyListener(gb.joypad));
+            Screen s = new Screen();
+            gb.video.lcd = s;
+            frame.getContentPane().add(s.comp);
+            frame.pack();
+            frame.setVisible(true);
+            ret = gb.run(null, mon);
+        }
         else
-            ret = dbg.run();
+        {
+            //System.out.println("Gameboy test");
+            Debugger dbg = new Debugger(rom, screen, bios);
+            dbg.trace = trace;
+            //dbg.gb.link.out = null;
+            if (rom == null || debug)
+                dbg.go();
+            else
+                ret = dbg.run();
+        }
             
         System.exit(ret & 0xFF);
     }

@@ -6,13 +6,13 @@ import static radsoft.radboy.utils.ByteEx.*;
 import radsoft.radboy.utils.ShortEx;
 import java.io.*;
 
-public class Debugger implements Gameboy.Monitor
+public class Debugger
 {
     final Gameboy gb;
     final java.util.Set<Short> bp = new java.util.HashSet<Short>();
     public boolean trace = false;
     public boolean sspinner = true;
-    private boolean breakpoint = false;
+    private final GameboyMonitor mon = new GameboyMonitor();
     
     final PrintStream o = System.out;
     final BufferedReader i = new BufferedReader(new InputStreamReader(System.in));
@@ -41,6 +41,9 @@ public class Debugger implements Gameboy.Monitor
             openScreen();
         gb.link.out = o;
         
+        mon.breakOnInfiniteLoop = true;
+        mon.breakOnStop = true;
+
         // TODO Dump rom details - name, id, romsize
         o.printf("Title: %s\n", gb.cart.getTitle());
         o.printf("Manufacturer: %s\n", gb.cart.getManufacturer());
@@ -120,7 +123,7 @@ public class Debugger implements Gameboy.Monitor
                         for (int i = 0; i < count; ++i)
                         {
                             o.print(bp.contains(gb.cpu.pc) ? '*' : ' ');
-                            gb.cpu.step(o, false, this);
+                            gb.cpu.step(o, false, mon);
                         }
                         gb.cpu.pc = pc;
                     }
@@ -260,7 +263,7 @@ public class Debugger implements Gameboy.Monitor
                                 bp.remove(l);
                         }
                         else
-                            gb.step(o, this);
+                            gb.step(o, mon);
                     }
                     break;
 
@@ -314,18 +317,29 @@ public class Debugger implements Gameboy.Monitor
         }
     }
     
-    private Screen s;
+    private javax.swing.JFrame sf;
     
     void openScreen()
     {
-        //if (gb.video.lcd == null)
-        if (s == null)
+        if (sf == null)
         {
-            s = new Screen(gb.video, gb.joypad);
-            //s.open();
+            sf = new javax.swing.JFrame("Gameboy");
+            sf.setDefaultCloseOperation(javax.swing.JFrame.DISPOSE_ON_CLOSE);
+            sf.addWindowListener(new java.awt.event.WindowAdapter() {
+                @Override
+                public void windowClosing(java.awt.event.WindowEvent e)
+                {
+                    sf = null;
+                    gb.video.lcd =  null;
+                }
+            });
+            sf.addKeyListener(new JoypadKeyListener(gb.joypad));
+            Screen s = new Screen();
+            gb.video.lcd = s;
+            sf.getContentPane().add(s.comp);
+            sf.pack();
         }
-        //((Screen) gb.video.lcd).open();
-        s.open();
+        sf.setVisible(true);
     }
     
     void showMapTile(java.io.PrintStream o)
@@ -364,12 +378,12 @@ public class Debugger implements Gameboy.Monitor
     {
         int si = 0;
         int p = 0;
-        breakpoint = false;
+        mon.setBreak(false);
         ReadyThread t = new ReadyThread();
         t.start();
-        while (!doBreak())
+        while (!mon.doBreak())
         {
-            gb.step(trace ? o : null, this);
+            gb.step(trace ? o : null, mon);
             ++p;
             if (sspinner && !trace && p == 10000) { o.print(spinner[si++]); o.print('\b'); p = 0; si = si % spinner.length; }
             if (bp.contains(gb.cpu.pc))
@@ -379,28 +393,6 @@ public class Debugger implements Gameboy.Monitor
         t.join();
         if (!trace) o.println();
         return gb.cpu.a;
-    }
-    
-    @Override
-    public boolean doBreak()
-    {
-        return breakpoint;
-    }
-    
-    @Override
-    public void onInfiniteLoop()
-    {
-        // in an infintie loop as in some blarg tests
-        // in an infintie loop as in some mooneye tests
-        
-        if (gb.video.ly == 0x00)
-            breakpoint = true;
-    }
-    
-    @Override
-    public void onStop()
-    {
-        breakpoint = true;
     }
 
     private static byte parseByte(String s)
@@ -429,7 +421,7 @@ public class Debugger implements Gameboy.Monitor
             catch (IOException e)
             {
             }
-            breakpoint = true;
+            mon.setBreak(true);
         }
     };
 }
