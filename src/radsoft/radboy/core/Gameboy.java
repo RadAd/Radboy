@@ -25,10 +25,10 @@ public class Gameboy
     public final Link link;
     public final Joypad joypad;
 
-    public Gameboy(int biosMode, String romfile) throws java.io.IOException
+    public Gameboy(int biosMode)
     {
         mem = new Memory(biosMode);
-        cart = new Cartridge(romfile, mem);
+        cart = new Cartridge(mem);
         cpu = new Cpu(mem);
         timer = new Timer(mem);
         video = new Video(mem);

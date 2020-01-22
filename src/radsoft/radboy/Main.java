@@ -48,11 +48,9 @@ public class Main
             }
         }
         
-        byte ret = 0;
-
         if (screen && !debug)
         {
-            Gameboy gb = new Gameboy(bios, rom);
+            Gameboy gb = new Gameboy(bios);
             GameboyMonitor mon = new GameboyMonitor();
             javax.swing.JFrame frame = new javax.swing.JFrame("Gameboy");
             frame.setDefaultCloseOperation(javax.swing.JFrame.DISPOSE_ON_CLOSE);
@@ -68,7 +66,17 @@ public class Main
             frame.getContentPane().add(new ScreenPane(gb.video));
             frame.pack();
             frame.setVisible(true);
-            ret = gb.run(null, mon);
+
+            if (rom != null)
+            try
+            {
+                gb.cart.load(rom);
+                gb.run(null, mon);
+            }
+            catch (java.io.IOException e)
+            {
+                javax.swing.JOptionPane.showMessageDialog(frame, e, "Error loading rom", javax.swing.JOptionPane.ERROR_MESSAGE);
+            }
         }
         else
         {
@@ -76,13 +84,13 @@ public class Main
             Debugger dbg = new Debugger(rom, screen, bios);
             dbg.trace = trace;
             //dbg.gb.link.out = null;
+            byte ret = 0;
             if (rom == null || debug)
                 dbg.go();
             else
                 ret = dbg.run();
+            System.exit(ret & 0xFF);
         }
-            
-        System.exit(ret & 0xFF);
     }
     
     static java.awt.Image loadImage(String f)

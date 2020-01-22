@@ -23,7 +23,9 @@ public class Debugger
             
     public Debugger(String rom, boolean screen, int biosMode) throws IOException
     {
-        gb = new Gameboy(biosMode, rom);
+        gb = new Gameboy(biosMode);
+        if (rom != null)
+            gb.cart.load(rom);
         if (false)
         {
             gb.video.lcd = new Video.Lcd() {

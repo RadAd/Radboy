@@ -18,22 +18,28 @@ public class Cartridge implements Memory.Module
     final static short RAM_BEGIN = (short) 0xA000;
     final static short RAM_END = (short) 0xC000;
     
-    final byte rom[];
-    final byte ram[];
-    byte rom_bank = 0x01;
-    byte ram_bank = 0x00;
-    byte ram_enable = 0x00;
-    byte mode = 0x00;
-    
-    Cartridge(String romfile, Memory m) throws IOException
+    private byte rom[];
+    private byte ram[];
+    private byte rom_bank = 0x01;
+    private byte ram_bank = 0x00;
+    private byte ram_enable = 0x00;
+    private byte mode = 0x00;
+
+    Cartridge(Memory m)
     {
-        rom = loadbin(romfile);
+        rom = new byte[0x8000]; // 32Kb
         ram = new byte[getRamSize()];
         
         for (int i = us(ROM_BEGIN); i < us(ROM_END); i += 0x1000)
             m.module((short) i, this);
         for (int i = us(RAM_BEGIN); i < us(RAM_END); i += 0x1000)
             m.module((short) i, this);
+    }
+
+    public void load(String romfile) throws IOException
+    {
+        rom = loadbin(romfile);
+        ram = new byte[getRamSize()];
     }
 
     @Override
