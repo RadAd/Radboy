@@ -56,6 +56,7 @@ public class Main
             GameboyMonitor mon = new GameboyMonitor();
             javax.swing.JFrame frame = new javax.swing.JFrame("Gameboy");
             frame.setDefaultCloseOperation(javax.swing.JFrame.DISPOSE_ON_CLOSE);
+            frame.setIconImage(loadImage("/game-boy-icon-53-32x32.png"));
             frame.addWindowListener(new java.awt.event.WindowAdapter() {
                 @Override
                 public void windowClosing(java.awt.event.WindowEvent e)
@@ -84,5 +85,10 @@ public class Main
         }
             
         System.exit(ret & 0xFF);
+    }
+    
+    static java.awt.Image loadImage(String f)
+    {
+        return new javax.swing.ImageIcon(Main.class.getResource(f)).getImage();
     }
 }
