@@ -76,13 +76,33 @@ public class Main
             frame.addKeyListener(new JoypadKeyListener(gb.joypad));
             java.awt.event.ActionListener al = new java.awt.event.ActionListener() {
                 @Override
-                public void actionPerformed(java.awt.event.ActionEvent e)
+                public void actionPerformed(java.awt.event.ActionEvent event)
                 {
-                    javax.swing.JMenuItem item = (javax.swing.JMenuItem) e.getSource();
+                    javax.swing.JMenuItem item = (javax.swing.JMenuItem) event.getSource();
                     Command id = (Command) item.getClientProperty(MenuBarBuilder.ID);
                     //System.out.println("actionPerformed " + id);
                     switch (id)
                     {
+                    case FILE_OPEN:
+                        javax.swing.JFileChooser fc = new javax.swing.JFileChooser();
+                        fc.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter("Gameboy files", "gb"));
+                        int returnVal = fc.showOpenDialog(frame);
+                        if (returnVal == javax.swing.JFileChooser.APPROVE_OPTION)
+                        {
+                            java.io.File selectedFile = fc.getSelectedFile();
+                            try
+                            {
+                                // TODO Need to reset gameboy
+                                gb.cart.load(selectedFile.getAbsolutePath());
+                                //gb.run(null, mon);
+                            }
+                            catch (java.io.IOException e)
+                            {
+                                javax.swing.JOptionPane.showMessageDialog(frame, e, "Error loading rom", javax.swing.JOptionPane.ERROR_MESSAGE);
+                            }
+                        }
+                        break;
+                        
                     case FILE_EXIT:
                         frame.dispose();
                         break;
@@ -99,7 +119,7 @@ public class Main
             };
             frame.setJMenuBar(new MenuBarBuilder(al)
                 .menu("File", 'F')
-                    .item(Command.FILE_OPEN, "Load ROM", 'L', KeyStroke.getKeyStroke(KeyEvent.VK_L, InputEvent.CTRL_DOWN_MASK))
+                    .item(Command.FILE_OPEN, "Load ROM...", 'L', KeyStroke.getKeyStroke(KeyEvent.VK_L, InputEvent.CTRL_DOWN_MASK))
                     .item(Command.FILE_EXIT, "Exit", 'X', KeyStroke.getKeyStroke(KeyEvent.VK_X, InputEvent.ALT_DOWN_MASK))
                     .pop()
                 .menu("Help", 'H')
