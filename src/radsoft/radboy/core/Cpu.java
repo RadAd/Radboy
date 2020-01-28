@@ -76,7 +76,7 @@ public class Cpu implements Memory.Module
     public byte l;
 
     public short sp;
-    public short pc;
+    public short pc = 0x0000;
 
     private final Memory mem;
     
@@ -86,6 +86,20 @@ public class Cpu implements Memory.Module
     {
         mem = m;
         mem.port(IF, this);
+    }
+    
+    public void reset()
+    {
+        a = 0;
+        f = 0;
+        b = 0;
+        c = 0;
+        d = 0;
+        e = 0;
+        h = 0;
+        l = 0;
+        sp = 0x0000;
+        pc = 0x0000;
     }
 
     public void add(Listener l)

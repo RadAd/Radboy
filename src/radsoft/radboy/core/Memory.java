@@ -56,6 +56,11 @@ public class Memory
         bootRom = new BootRom(this, biosMode);
     }
     
+    public void reset()
+    {
+        bootRom.reset();
+    }
+    
     public void add(Listener l)
     {
         ls.add(l);

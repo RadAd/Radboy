@@ -41,6 +41,14 @@ public class Cartridge implements Memory.Module
         rom = loadbin(romfile);
         ram = new byte[getRamSize()];
     }
+    
+    public void reset()
+    {
+        rom_bank = 0x01;
+        ram_bank = 0x00;
+        ram_enable = 0x00;
+        mode = 0x00;
+    }
 
     @Override
     public byte read(short loc)

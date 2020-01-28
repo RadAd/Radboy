@@ -35,6 +35,13 @@ public class Gameboy
         link = new Link(mem);
         joypad = new Joypad(mem);
     }
+    
+    public void reset()
+    {
+        mem.reset();
+        cart.reset();
+        cpu.reset();
+    }
 
     public void step(java.io.PrintStream o, Monitor mon)
     {

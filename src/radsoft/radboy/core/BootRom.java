@@ -23,6 +23,11 @@ class BootRom implements Memory.Module
         mem.port(CHECK, this);
     }
     
+    public void reset()
+    {
+        check = 0;
+    }
+    
     private void unload()
     {
         if (check == 0x01)

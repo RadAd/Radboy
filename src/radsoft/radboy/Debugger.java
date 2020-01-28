@@ -6,13 +6,16 @@ import static radsoft.radboy.utils.ByteEx.*;
 import radsoft.radboy.utils.ShortEx;
 import java.io.*;
 
+// TODO
+// Use the Gameboy Monitor thread somehow
+
 public class Debugger
 {
     final Gameboy gb;
     final java.util.Set<Short> bp = new java.util.HashSet<Short>();
     public boolean trace = false;
     public boolean sspinner = true;
-    private final GameboyMonitor mon = new GameboyMonitor();
+    private final GameboyMonitor mon;
     
     final PrintStream o = System.out;
     final BufferedReader i = new BufferedReader(new InputStreamReader(System.in));
@@ -24,6 +27,7 @@ public class Debugger
     public Debugger(String rom, boolean screen, int biosMode) throws IOException
     {
         gb = new Gameboy(biosMode);
+        mon = new GameboyMonitor(gb);
         if (rom != null)
             gb.cart.load(rom);
         if (false)
@@ -410,6 +414,8 @@ public class Debugger
     class ReadyThread extends Thread
     {
         public boolean exit = false;
+        
+        @Override
         public void run()
         {
             try

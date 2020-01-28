@@ -4,7 +4,13 @@ import radsoft.radboy.core.Gameboy;
 
 class GameboyMonitor implements Gameboy.Monitor
 {
+    private final Gameboy gb;
     private boolean breakpoint = false;
+    
+    GameboyMonitor(Gameboy gb)
+    {
+        this.gb = gb;
+    }
     
     boolean breakOnInfiniteLoop = false;
     boolean breakOnStop = false;
@@ -35,5 +41,34 @@ class GameboyMonitor implements Gameboy.Monitor
     {
         if (breakOnStop)
             breakpoint = true;
+    }
+    
+    private final Runnable r = new Runnable() {
+        @Override
+        public void run()
+        {
+            breakpoint = false;
+            gb.run(null, GameboyMonitor.this);
+        }
+    };
+    
+    private Thread t = null;
+    
+    void start(Thread.UncaughtExceptionHandler eh)
+    {
+        System.out.println("GameboyMonitor start");
+        if (t != null)
+            throw new IllegalStateException();
+        t = new Thread(r);
+        t.setUncaughtExceptionHandler(eh);
+        t.start();
+    }
+    
+    void stop() throws InterruptedException
+    {
+        breakpoint = true;
+        if (t != null)  // TODO AG Need to tell it to stop somehow
+            t.join();
+        t = null;
     }
 };
