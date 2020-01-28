@@ -14,6 +14,8 @@ import java.net.URL;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
+// TODO Use java.util.logging.Logger
+
 public class Main
 {
     public static void main(String[] args) throws Exception
@@ -61,11 +63,25 @@ public class Main
         
         if (screen && !debug)
         {
-            Gameboy gb = new Gameboy(bios);
-            GameboyMonitor mon = new GameboyMonitor();
-            javax.swing.JFrame frame = new javax.swing.JFrame("RadBoy");
+            final Gameboy gb = new Gameboy(bios);
+            final GameboyMonitor mon = new GameboyMonitor(gb);
+            final javax.swing.JFrame frame = new javax.swing.JFrame("RadBoy");
             frame.setDefaultCloseOperation(javax.swing.JFrame.DISPOSE_ON_CLOSE);
             frame.setIconImage(loadImage("/game-boy-icon-53-32x32.png"));
+            final Thread.UncaughtExceptionHandler eh = new Thread.UncaughtExceptionHandler() {
+                @Override
+                public void uncaughtException(Thread t, Throwable e)
+                {
+                    javax.swing.SwingUtilities.invokeLater(new Runnable() {
+                        @Override
+                        public void run()
+                        {
+                            javax.swing.JOptionPane.showMessageDialog(frame, e, "Error running thread ", javax.swing.JOptionPane.ERROR_MESSAGE);
+                        }
+                    });
+                    e.printStackTrace();
+                }
+            };
             frame.addWindowListener(new java.awt.event.WindowAdapter() {
                 @Override
                 public void windowClosing(java.awt.event.WindowEvent e)
@@ -75,6 +91,7 @@ public class Main
             });
             frame.addKeyListener(new JoypadKeyListener(gb.joypad));
             java.awt.event.ActionListener al = new java.awt.event.ActionListener() {
+                java.io.File dir = new java.io.File(".").getAbsoluteFile();
                 @Override
                 public void actionPerformed(java.awt.event.ActionEvent event)
                 {
@@ -84,23 +101,34 @@ public class Main
                     switch (id)
                     {
                     case FILE_OPEN:
-                        javax.swing.JFileChooser fc = new javax.swing.JFileChooser();
+                        javax.swing.JFileChooser fc = new javax.swing.JFileChooser(dir);
                         fc.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter("Gameboy files", "gb"));
                         int returnVal = fc.showOpenDialog(frame);
                         if (returnVal == javax.swing.JFileChooser.APPROVE_OPTION)
                         {
+                            dir = fc.getCurrentDirectory();
                             java.io.File selectedFile = fc.getSelectedFile();
                             try
                             {
                                 // TODO Need to reset gameboy
+                                mon.stop();
                                 gb.cart.load(selectedFile.getAbsolutePath());
-                                //gb.run(null, mon);
+                                gb.reset();
+                                mon.start(eh);
+                            }
+                            catch (InterruptedException e)
+                            {
+                                javax.swing.JOptionPane.showMessageDialog(frame, e, "Error stopping thread ", javax.swing.JOptionPane.ERROR_MESSAGE);
                             }
                             catch (java.io.IOException e)
                             {
                                 javax.swing.JOptionPane.showMessageDialog(frame, e, "Error loading rom", javax.swing.JOptionPane.ERROR_MESSAGE);
                             }
                         }
+                        break;
+                        
+                    case FILE_RESET:
+                        gb.reset();
                         break;
                         
                     case FILE_EXIT:
@@ -120,6 +148,7 @@ public class Main
             frame.setJMenuBar(new MenuBarBuilder(al)
                 .menu("File", 'F')
                     .item(Command.FILE_OPEN, "Load ROM...", 'L', KeyStroke.getKeyStroke(KeyEvent.VK_L, InputEvent.CTRL_DOWN_MASK))
+                    .item(Command.FILE_RESET, "Reset", 'R')
                     .item(Command.FILE_EXIT, "Exit", 'X', KeyStroke.getKeyStroke(KeyEvent.VK_X, InputEvent.ALT_DOWN_MASK))
                     .pop()
                 .menu("Help", 'H')
@@ -134,7 +163,8 @@ public class Main
             try
             {
                 gb.cart.load(rom);
-                gb.run(null, mon);
+                mon.stop();
+                mon.start(eh);
             }
             catch (java.io.IOException e)
             {
@@ -159,6 +189,7 @@ public class Main
     enum Command
     {
         FILE_OPEN,
+        FILE_RESET,
         FILE_EXIT,
         HELP_ABOUT,
     };
