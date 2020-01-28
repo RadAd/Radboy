@@ -54,9 +54,14 @@ class GameboyMonitor implements Gameboy.Monitor
     
     private Thread t = null;
     
+    boolean isPaused()
+    {
+        return t == null;
+    }
+    
     void start(Thread.UncaughtExceptionHandler eh)
     {
-        System.out.println("GameboyMonitor start");
+        //System.out.println("GameboyMonitor start");
         if (t != null)
             throw new IllegalStateException();
         t = new Thread(r);

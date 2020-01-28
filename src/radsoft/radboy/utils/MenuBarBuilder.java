@@ -1,5 +1,6 @@
 package radsoft.radboy.utils;
 
+import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
@@ -10,12 +11,15 @@ public class MenuBarBuilder
     public static String ID = "ID";
     
     private final java.awt.event.ActionListener al;
+    private final MenuModel mm;
+    
     private final JMenuBar menuBar = new JMenuBar();
     private final java.util.Stack<JMenu> s = new java.util.Stack<JMenu>();
     
-    public MenuBarBuilder(java.awt.event.ActionListener al)
+    public MenuBarBuilder(java.awt.event.ActionListener al, MenuModel mm)
     {
         this.al = al;
+        this.mm = mm;
     }
     
     public JMenuBar get()
@@ -79,6 +83,31 @@ public class MenuBarBuilder
         item.putClientProperty(ID, id);
         item.setMnemonic(mnemonic);
         item.setAccelerator(ks);
+        item.addActionListener(al);
+        menu.add(item);
+        return this;
+    }
+    
+    public MenuBarBuilder check(Object id, String n, int mnemonic)
+    {
+        JMenu menu = menu();
+        JMenuItem item = new JCheckBoxMenuItem(n);
+        item.setModel(new javax.swing.DefaultButtonModel() {
+            @Override
+            public boolean isEnabled()
+            {
+                return mm.isEnabled(item);
+            }
+            @Override
+            public boolean isSelected()
+            {
+                return mm.isSelected(item);
+            }
+        });
+
+        item.putClientProperty(ID, id);
+        item.setMnemonic(mnemonic);
+        //item.setAccelerator(ks);
         item.addActionListener(al);
         menu.add(item);
         return this;

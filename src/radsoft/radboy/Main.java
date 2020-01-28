@@ -135,6 +135,20 @@ public class Main
                         frame.dispose();
                         break;
                         
+                    case DEBUG_PAUSE:
+                        if (mon.isPaused())
+                            mon.start(eh);
+                        else
+                            try
+                            {
+                                mon.stop();
+                            }
+                            catch (InterruptedException e)
+                            {
+                                javax.swing.JOptionPane.showMessageDialog(frame, e, "Error stopping thread ", javax.swing.JOptionPane.ERROR_MESSAGE);
+                            }
+                        break;
+                        
                     case DEBUG_REG:
                         Registers rv = new Registers(gb.cpu);
                         //rv.open();
@@ -155,13 +169,35 @@ public class Main
                     }
                 }
             };
-            frame.setJMenuBar(new MenuBarBuilder(al)
+            radsoft.radboy.utils.MenuModel mm = new radsoft.radboy.utils.MenuModel() {
+                @Override
+                public boolean isEnabled(javax.swing.JMenuItem item)
+                {
+                    return true;
+                }
+                
+                @Override
+                public boolean isSelected(javax.swing.JMenuItem item)
+                {
+                    Command id = (Command) item.getClientProperty(MenuBarBuilder.ID);
+                    //System.out.println("isSelected " + id);
+                    switch (id)
+                    {
+                    case DEBUG_PAUSE:
+                        return mon.isPaused();
+                    default:
+                        return false;
+                    }
+                }
+            };
+            frame.setJMenuBar(new MenuBarBuilder(al, mm)
                 .menu("File", 'F')
                     .item(Command.FILE_OPEN, "Load ROM...", 'L', KeyStroke.getKeyStroke(KeyEvent.VK_L, InputEvent.CTRL_DOWN_MASK))
                     .item(Command.FILE_RESET, "Reset", 'R')
                     .item(Command.FILE_EXIT, "Exit", 'X', KeyStroke.getKeyStroke(KeyEvent.VK_X, InputEvent.ALT_DOWN_MASK))
                     .pop()
                 .menu("Debug", 'D')
+                    .check(Command.DEBUG_PAUSE, "Pause", 'P')
                     .item(Command.DEBUG_REG, "Registers...", 'R')
                     .item(Command.DEBUG_MEM, "Memory...", 'M')
                     .pop()
@@ -205,6 +241,7 @@ public class Main
         FILE_OPEN,
         FILE_RESET,
         FILE_EXIT,
+        DEBUG_PAUSE,
         DEBUG_REG,
         DEBUG_MEM,
         HELP_ABOUT,
