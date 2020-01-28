@@ -141,7 +141,7 @@ public class Main
                         break;
                         
                     case DEBUG_MEM:
-                        MemWatchView mwv = new MemWatchView(gb.mem);
+                        MemWatchView mwv = new MemWatchView(frame, gb.mem);
                         mwv.open();
                         break;
                         

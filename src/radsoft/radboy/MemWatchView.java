@@ -19,7 +19,7 @@ import static radsoft.radboy.utils.Types.*;
 
 public class MemWatchView
 {
-    final JFrame frame = new JFrame("Memory");
+    final JDialog dlg;
     final MemoryTableModel model = new MemoryTableModel();
     final JTable table = new JTable(model);
     final Memory mem;
@@ -135,12 +135,13 @@ public class MemWatchView
         }
     }
     
-    MemWatchView(Memory mem)
+    MemWatchView(JFrame f, Memory mem)
     {
+        this.dlg = new JDialog(f, "Memory");
         this.mem = mem;
         
-        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        frame.addWindowListener(new java.awt.event.WindowAdapter()
+        dlg.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        dlg.addWindowListener(new java.awt.event.WindowAdapter()
         {
             @Override
             public void windowClosing(java.awt.event.WindowEvent windowEvent)
@@ -159,8 +160,8 @@ public class MemWatchView
     void open()
     {
         table.doLayout();
-        frame.getContentPane().add(new JScrollPane(table));
-        frame.pack();
-        frame.setVisible(true);
+        dlg.getContentPane().add(new JScrollPane(table));
+        dlg.pack();
+        dlg.setVisible(true);
     }
 }
