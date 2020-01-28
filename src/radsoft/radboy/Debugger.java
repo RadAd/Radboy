@@ -227,7 +227,7 @@ public class Debugger
                     switch (args[1])
                     {
                     case "mem":
-                        MemWatchView mwv = new MemWatchView(gb.mem);
+                        MemWatchView mwv = new MemWatchView(null, gb.mem);
                         mwv.open();
                         break;
                     case "reg":
