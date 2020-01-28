@@ -135,6 +135,16 @@ public class Main
                         frame.dispose();
                         break;
                         
+                    case DEBUG_REG:
+                        Registers rv = new Registers(gb.cpu);
+                        //rv.open();
+                        break;
+                        
+                    case DEBUG_MEM:
+                        MemWatchView mwv = new MemWatchView(gb.mem);
+                        mwv.open();
+                        break;
+                        
                     case HELP_ABOUT:
                         javax.swing.JOptionPane.showMessageDialog(frame, findVersionInfo(), "About", javax.swing.JOptionPane.INFORMATION_MESSAGE);
                         break;
@@ -150,6 +160,10 @@ public class Main
                     .item(Command.FILE_OPEN, "Load ROM...", 'L', KeyStroke.getKeyStroke(KeyEvent.VK_L, InputEvent.CTRL_DOWN_MASK))
                     .item(Command.FILE_RESET, "Reset", 'R')
                     .item(Command.FILE_EXIT, "Exit", 'X', KeyStroke.getKeyStroke(KeyEvent.VK_X, InputEvent.ALT_DOWN_MASK))
+                    .pop()
+                .menu("Debug", 'D')
+                    .item(Command.DEBUG_REG, "Registers...", 'R')
+                    .item(Command.DEBUG_MEM, "Memory...", 'M')
                     .pop()
                 .menu("Help", 'H')
                     .item(Command.HELP_ABOUT, "About...", 'A')
@@ -191,6 +205,8 @@ public class Main
         FILE_OPEN,
         FILE_RESET,
         FILE_EXIT,
+        DEBUG_REG,
+        DEBUG_MEM,
         HELP_ABOUT,
     };
     

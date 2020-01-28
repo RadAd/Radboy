@@ -17,7 +17,7 @@ public class Registers implements ActionListener, AncestorListener, Cpu.Listener
     java.util.Map<Cpu.Reg8, JTextField> map = new java.util.HashMap<>();
     Cpu cpu;
     
-    Registers(Cpu cpu) throws java.text.ParseException
+    Registers(Cpu cpu)
     {
         this.cpu = cpu;
         cpu.add(this);
@@ -69,16 +69,23 @@ public class Registers implements ActionListener, AncestorListener, Cpu.Listener
             t.setText(String.format("%02X", cpu.reg(r)));
     }
     
-    JTextField add(Container cp, String label, GridBagConstraints c) throws java.text.ParseException
+    JTextField add(Container cp, String label, GridBagConstraints c)
     {
-        JLabel l;
-        JTextField t;
-        cp.add(l = new JLabel(label, SwingConstants.RIGHT), c);
-        cp.add(t = new JFormattedTextField(new javax.swing.text.MaskFormatter("HH")), c);
-        t.addActionListener(this);
-        FontMetrics fm = t.getFontMetrics(t.getFont());
-        t.setPreferredSize(new Dimension(fm.stringWidth("FFF"), fm.getHeight()));
-        return t;
+        try
+        {
+            JLabel l;
+            JTextField t;
+            cp.add(l = new JLabel(label, SwingConstants.RIGHT), c);
+            cp.add(t = new JFormattedTextField(new javax.swing.text.MaskFormatter("HH")), c);
+            t.addActionListener(this);
+            FontMetrics fm = t.getFontMetrics(t.getFont());
+            t.setPreferredSize(new Dimension(fm.stringWidth("FFF"), fm.getHeight()));
+            return t;
+        }
+        catch (java.text.ParseException e)
+        {
+            throw new Error(e);
+        }
     }
     
     // ActionListener
