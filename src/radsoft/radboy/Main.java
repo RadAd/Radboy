@@ -149,6 +149,11 @@ public class Main
                             }
                         break;
                         
+                    case DEBUG_TRACE:
+                        TraceView tv = new TraceView(frame, mon);
+                        tv.open();
+                        break;
+                        
                     case DEBUG_REG:
                         Registers rv = new Registers(gb.cpu);
                         //rv.open();
@@ -198,6 +203,7 @@ public class Main
                     .pop()
                 .menu("Debug", 'D')
                     .check(Command.DEBUG_PAUSE, "Pause", 'P')
+                    .item(Command.DEBUG_TRACE, "Trace...", 'T')
                     .item(Command.DEBUG_REG, "Registers...", 'R')
                     .item(Command.DEBUG_MEM, "Memory...", 'M')
                     .pop()
@@ -242,6 +248,7 @@ public class Main
         FILE_RESET,
         FILE_EXIT,
         DEBUG_PAUSE,
+        DEBUG_TRACE,
         DEBUG_REG,
         DEBUG_MEM,
         HELP_ABOUT,

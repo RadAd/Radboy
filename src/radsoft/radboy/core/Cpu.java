@@ -101,6 +101,8 @@ public class Cpu implements Memory.Module
         sp = 0x0000;
         pc = 0x0000;
     }
+    
+    public int cycle() { return cycle; }
 
     public void add(Listener l)
     {

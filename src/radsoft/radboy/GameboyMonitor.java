@@ -6,6 +6,9 @@ class GameboyMonitor implements Gameboy.Monitor
 {
     private final Gameboy gb;
     private boolean breakpoint = false;
+    private long start;
+    private int startCycle;
+    java.io.PrintStream trace = null;
     
     GameboyMonitor(Gameboy gb)
     {
@@ -23,6 +26,7 @@ class GameboyMonitor implements Gameboy.Monitor
     @Override
     public boolean doBreak()
     {
+        throttle();
         return breakpoint;
     }
 
@@ -48,7 +52,9 @@ class GameboyMonitor implements Gameboy.Monitor
         public void run()
         {
             breakpoint = false;
-            gb.run(null, GameboyMonitor.this);
+            start = System.currentTimeMillis();
+            startCycle = gb.cpu.cycle();
+            gb.run(trace, GameboyMonitor.this);
         }
     };
     
@@ -75,5 +81,26 @@ class GameboyMonitor implements Gameboy.Monitor
         if (t != null)  // TODO AG Need to tell it to stop somehow
             t.join();
         t = null;
+    }
+    
+    void throttle()
+    {
+        final long now = System.currentTimeMillis();
+        final int m = (int) (now - start);
+        final int clockspeed = 4194304; // hz
+
+        final long c = gb.cpu.cycle() - startCycle;
+        final long r = (c * 1000) / (clockspeed * 2);
+        
+        if ((r - m) > 100)
+        {
+            try
+            {
+                Thread.sleep(r - m);
+            }
+            catch (InterruptedException e)
+            {
+            }
+        }
     }
 };
