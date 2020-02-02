@@ -83,6 +83,11 @@ class GameboyMonitor implements Gameboy.Monitor
         t = null;
     }
     
+    void step()
+    {
+        gb.step(trace, this);
+    }
+    
     void throttle()
     {
         final long now = System.currentTimeMillis();

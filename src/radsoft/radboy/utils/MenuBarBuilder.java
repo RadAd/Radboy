@@ -91,6 +91,25 @@ public class MenuBarBuilder
     public MenuBarBuilder check(Object id, String n, int mnemonic)
     {
         JMenu menu = menu();
+        JMenuItem item = createCheck(id, n);
+        item.setMnemonic(mnemonic);
+        //item.setAccelerator(ks);
+        menu.add(item);
+        return this;
+    }
+    
+    public MenuBarBuilder check(Object id, String n, int mnemonic, KeyStroke ks)
+    {
+        JMenu menu = menu();
+        JMenuItem item = createCheck(id, n);
+        item.setMnemonic(mnemonic);
+        item.setAccelerator(ks);
+        menu.add(item);
+        return this;
+    }
+    
+    private JMenuItem createCheck(Object id, String n)
+    {
         JMenuItem item = new JCheckBoxMenuItem(n);
         item.setModel(new javax.swing.DefaultButtonModel() {
             @Override
@@ -106,11 +125,9 @@ public class MenuBarBuilder
         });
 
         item.putClientProperty(ID, id);
-        item.setMnemonic(mnemonic);
-        //item.setAccelerator(ks);
         item.addActionListener(al);
-        menu.add(item);
-        return this;
+        
+        return item;
     }
     
     public MenuBarBuilder pop()

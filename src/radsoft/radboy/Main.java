@@ -148,7 +148,12 @@ public class Main
                                 javax.swing.JOptionPane.showMessageDialog(frame, e, "Error stopping thread ", javax.swing.JOptionPane.ERROR_MESSAGE);
                             }
                         break;
-                        
+
+                    case DEBUG_STEP:
+                        if (mon.isPaused())
+                            mon.step();
+                        break;
+
                     case DEBUG_TRACE:
                         TraceView tv = new TraceView(frame, mon);
                         tv.open();
@@ -178,7 +183,17 @@ public class Main
                 @Override
                 public boolean isEnabled(javax.swing.JMenuItem item)
                 {
-                    return true;
+                    Command id = (Command) item.getClientProperty(MenuBarBuilder.ID);
+                    if (id == null)
+                        return true;
+                    //System.out.println("isEnabled " + id);
+                    switch (id)
+                    {
+                    case DEBUG_STEP:
+                        return mon.isPaused();
+                    default:
+                        return true;
+                    }
                 }
                 
                 @Override
@@ -202,7 +217,8 @@ public class Main
                     .item(Command.FILE_EXIT, "Exit", 'X', KeyStroke.getKeyStroke(KeyEvent.VK_X, InputEvent.ALT_DOWN_MASK))
                     .pop()
                 .menu("Debug", 'D')
-                    .check(Command.DEBUG_PAUSE, "Pause", 'P')
+                    .check(Command.DEBUG_PAUSE, "Pause", 'P', KeyStroke.getKeyStroke(KeyEvent.VK_F5, 0))
+                    .item(Command.DEBUG_STEP, "Step", 'S', KeyStroke.getKeyStroke(KeyEvent.VK_F7, 0))
                     .item(Command.DEBUG_TRACE, "Trace...", 'T')
                     .item(Command.DEBUG_REG, "Registers...", 'R')
                     .item(Command.DEBUG_MEM, "Memory...", 'M')
@@ -248,6 +264,7 @@ public class Main
         FILE_RESET,
         FILE_EXIT,
         DEBUG_PAUSE,
+        DEBUG_STEP,
         DEBUG_TRACE,
         DEBUG_REG,
         DEBUG_MEM,
