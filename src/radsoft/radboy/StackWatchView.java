@@ -21,15 +21,16 @@ import static radsoft.radboy.utils.Types.*;
 // TODO
 // Change background of address to make it look like a header
 // Change cell editor to only allow hex numbers
+// Show stack upside down
 
-public class MemWatchView
+public class StackWatchView
 {
     final JDialog dlg;
     final MemoryTableModel model = new MemoryTableModel();
     final JTable table = new JTable(model);
     final Memory mem;
     
-    static int COLUMNS = 16;
+    static int COLUMNS = 1;
     
     private java.util.Set<Short> modified = new java.util.HashSet<Short>();
         
@@ -57,25 +58,27 @@ public class MemWatchView
             if (columnIndex == 0)
                 return "Address";
             else
-                return toHexString((byte) (columnIndex - 1));
+                return "Value";
         }
         
         public int getRowCount()
         {
-            return (0xFFFF + 1) / COLUMNS;
+            return (0xFFFF + 1) / (2 * COLUMNS);
         }
         
         public Object getValueAt(int rowIndex, int columnIndex)
         {
             if (columnIndex == 0)
             {
-                short address = (short) (rowIndex * COLUMNS);
+                short address = (short) (rowIndex * (2 * COLUMNS));
                 return us(address);
             }
             else
             {
-                byte b = mem.read((short) (rowIndex * COLUMNS + columnIndex - 1));
-                return ub(b);
+                short address = (short) (rowIndex * (2 * COLUMNS));
+                byte bl = mem.read((short) (address + columnIndex - 1));
+                byte bh = mem.read((short) (address + columnIndex - 0));
+                return us(makeShort(bh, bl));
             }
         }
         
@@ -102,8 +105,8 @@ public class MemWatchView
         public void changedMemory(short loc)
         {
             modified.add(loc);
-            int row = us(loc) / COLUMNS;
-            int col = us(loc) % COLUMNS + 1;
+            int row = us(loc) / (2 * COLUMNS);
+            int col = us(loc) % (2 * COLUMNS) + 1; // TODO
             //debug("changedMemory %04X, %d %d\n", us(loc), row, col);
             for (TableModelListener l : ls)
                 l.tableChanged(new TableModelEvent(this, row, row, col));
@@ -127,22 +130,22 @@ public class MemWatchView
         public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column)
         {
             //debug("getTableCellRendererComponent %d %d %s\n", row, column, value);
-            short loc = column > 0 ? (short) (row * COLUMNS + (column - 1)) : -1;
+            short loc = column > 0 ? (short) (row * (2 * COLUMNS) + (column - 1)) : -1;
             if (value instanceof Integer)
-                value = String.format(column == 0 ? "%04X" : "%02X", value);
+                value = String.format("%04X", value);
 
             Component cellComponent = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
             //cellComponent.setForeground(value.equals("00") ? Color.RED : color);
             //cellComponent.setFont(column == 2 ? bold : normal);
             Font f = cellComponent.getFont();
-            cellComponent.setFont(modified.contains(loc) ? f.deriveFont(Font.BOLD) : f.deriveFont(Font.PLAIN));
+            cellComponent.setFont(modified.contains(loc + 0) || modified.contains(loc + 1) ? f.deriveFont(Font.BOLD) : f.deriveFont(Font.PLAIN));
             return cellComponent;
         }
     }
     
-    MemWatchView(JFrame f, Memory mem)
+    StackWatchView(JFrame f, Memory mem)
     {
-        this.dlg = new JDialog(f, "Memory");
+        this.dlg = new JDialog(f, "Stack");
         this.mem = mem;
         
         dlg.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -155,8 +158,6 @@ public class MemWatchView
             }
         });
         table.getTableHeader().setReorderingAllowed(false);
-        TableColumn column = table.getColumnModel().getColumn(0);
-        column.setPreferredWidth(column.getPreferredWidth() * 2);
         table.setDefaultRenderer(String.class, new MemoryTableCellRenderer());
         
         mem.add(model);

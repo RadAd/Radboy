@@ -168,7 +168,12 @@ public class Main
                         MemWatchView mwv = new MemWatchView(frame, gb.mem);
                         mwv.open();
                         break;
-                        
+
+                    case DEBUG_STACK:
+                        StackWatchView swv = new StackWatchView(frame, gb.mem);
+                        swv.open();
+                        break;
+
                     case HELP_ABOUT:
                         javax.swing.JOptionPane.showMessageDialog(frame, findVersionInfo(), "About", javax.swing.JOptionPane.INFORMATION_MESSAGE);
                         break;
@@ -222,6 +227,7 @@ public class Main
                     .item(Command.DEBUG_TRACE, "Trace...", 'T')
                     .item(Command.DEBUG_REG, "Registers...", 'R')
                     .item(Command.DEBUG_MEM, "Memory...", 'M')
+                    .item(Command.DEBUG_STACK, "Stack...")
                     .pop()
                 .menu("Help", 'H')
                     .item(Command.HELP_ABOUT, "About...", 'A')
@@ -268,6 +274,7 @@ public class Main
         DEBUG_TRACE,
         DEBUG_REG,
         DEBUG_MEM,
+        DEBUG_STACK,
         HELP_ABOUT,
     };
     
