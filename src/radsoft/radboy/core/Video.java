@@ -215,13 +215,13 @@ public class Video implements Memory.Module
         return testBit(usingWindow ? Bit6 : Bit3, lcdc) ? (short) 0x9C00 : (short) 0x9800;
     }
     
-    private byte unpackTilePixel(byte data1, byte data2, int x)
+    public static byte unpackTilePixel(byte data1, byte data2, int x)
     {
         assert(x >= 0 && x < 8);
         final int bit = 8 - x - 1;
         assert(bit >= 0 && bit < 8);
-        final int c1 = testBit((byte) (1 << bit), data1) ? 2 : 0;
-        final int c2 = testBit((byte) (1 << bit), data2) ? 4 : 0;
+        final int c1 = testBit((byte) (1 << bit), data1) ? 1 : 0;
+        final int c2 = testBit((byte) (1 << bit), data2) ? 2 : 0;
         final int px = c1 | c2;
         return (byte) px;
     }

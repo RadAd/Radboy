@@ -169,6 +169,11 @@ public class Main
                         mwv.open();
                         break;
 
+                    case DEBUG_TILE:
+                        TileWatchView twv = new TileWatchView(frame, gb.mem);
+                        twv.open();
+                        break;
+
                     case DEBUG_STACK:
                         StackWatchView swv = new StackWatchView(frame, gb.mem);
                         swv.open();
@@ -227,6 +232,7 @@ public class Main
                     .item(Command.DEBUG_TRACE, "Trace...", 'T')
                     .item(Command.DEBUG_REG, "Registers...", 'R')
                     .item(Command.DEBUG_MEM, "Memory...", 'M')
+                    .item(Command.DEBUG_TILE, "Tile...", 'I')
                     .item(Command.DEBUG_STACK, "Stack...")
                     .pop()
                 .menu("Help", 'H')
@@ -274,6 +280,7 @@ public class Main
         DEBUG_TRACE,
         DEBUG_REG,
         DEBUG_MEM,
+        DEBUG_TILE,
         DEBUG_STACK,
         HELP_ABOUT,
     };
