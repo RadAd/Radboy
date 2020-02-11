@@ -160,7 +160,7 @@ public class Main
                         break;
                         
                     case DEBUG_REG:
-                        Registers rv = new Registers(gb.cpu);
+                        Registers rv = new Registers(frame, gb.cpu);
                         //rv.open();
                         break;
                         

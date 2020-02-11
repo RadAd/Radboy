@@ -2,6 +2,8 @@ package radsoft.radboy;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import javax.swing.*;
 import javax.swing.GroupLayout.*;
 import javax.swing.event.*;
@@ -10,24 +12,30 @@ import radsoft.radboy.core.*;
 import static radsoft.radboy.utils.ByteEx.*;
 import static radsoft.radboy.utils.Types.*;
 
-public class Registers implements ActionListener, AncestorListener, Cpu.Listener
+public class Registers implements PropertyChangeListener, Cpu.Listener
 {
-    JFrame frame = new JFrame("Registers");
+    final JDialog dlg;
     //JComponent comp;
-    java.util.Map<Cpu.Reg8, JTextField> map = new java.util.HashMap<>();
+    java.util.Map<Cpu.Reg8, JFormattedTextField> map = new java.util.HashMap<>();
     Cpu cpu;
     
-    Registers(Cpu cpu)
+    Registers(Frame f, Cpu cpu)
     {
+        this.dlg = new JDialog(f, "Stack");
         this.cpu = cpu;
         cpu.add(this);
         
-        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        dlg.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        dlg.addWindowListener(new java.awt.event.WindowAdapter()
+        {
+            @Override
+            public void windowClosing(java.awt.event.WindowEvent windowEvent)
+            {
+                cpu.remove(Registers.this);
+            }
+        });
         
-        JComponent cp = (JComponent) frame.getContentPane();
-        cp.addAncestorListener(this);
-        cp.setLayout(new GridBagLayout());
-        cp.setBackground(UIManager.getColor("control"));
+        dlg.setLayout(new GridBagLayout());
 
         GridBagConstraints c = new GridBagConstraints();
         c.insets = new Insets(2, 2, 2, 2);
@@ -40,16 +48,16 @@ public class Registers implements ActionListener, AncestorListener, Cpu.Listener
         Cpu.Reg8 rs[] = { Cpu.Reg8.A, Cpu.Reg8.F, Cpu.Reg8.B, Cpu.Reg8.C, Cpu.Reg8.D, Cpu.Reg8.E, Cpu.Reg8.H, Cpu.Reg8.L };
         for(Cpu.Reg8 r : rs )
         {
-            JTextField t;
-            map.put(r, t = add(cp, r.toString(), c));
+            JFormattedTextField t;
+            map.put(r, t = add(dlg, r.toString(), c));
             t.putClientProperty("reg", r);
             if (a)
                 ++c.gridy;
             a = !a;
         }
         
-        frame.pack();
-        frame.setVisible(true);
+        dlg.pack();
+        dlg.setVisible(true);
         
         update();
     }
@@ -64,20 +72,40 @@ public class Registers implements ActionListener, AncestorListener, Cpu.Listener
     
     void update(Cpu.Reg8 r)
     {
-        JTextField t = map.get(r);
+        JFormattedTextField t = map.get(r);
         if (t != null)
-            t.setText(String.format("%02X", cpu.reg(r)));
+        {
+            t.setValue(ub(cpu.reg(r)));
+        }
     }
     
-    JTextField add(Container cp, String label, GridBagConstraints c)
+    JFormattedTextField add(Container cp, String label, GridBagConstraints c)
     {
         try
         {
+            javax.swing.JFormattedTextField.AbstractFormatter fmter = new javax.swing.text.MaskFormatter("HH") {
+                @Override
+                public String valueToString(Object value)
+                {
+                    String s = null;
+                    if (value instanceof Integer)
+                        s = String.format("%02X", (int) value);
+                    else
+                        s = "00";
+                    return s;
+                }
+                @Override
+                public Object stringToValue(String s)
+                {
+                    int v = Integer.parseInt(s, 16);
+                    return v;
+                }
+            };
             JLabel l;
-            JTextField t;
+            JFormattedTextField t;
             cp.add(l = new JLabel(label, SwingConstants.RIGHT), c);
-            cp.add(t = new JFormattedTextField(new javax.swing.text.MaskFormatter("HH")), c);
-            t.addActionListener(this);
+            cp.add(t = new JFormattedTextField(fmter), c);
+            t.addPropertyChangeListener(this);
             FontMetrics fm = t.getFontMetrics(t.getFont());
             t.setPreferredSize(new Dimension(fm.stringWidth("FFF"), fm.getHeight()));
             return t;
@@ -88,33 +116,21 @@ public class Registers implements ActionListener, AncestorListener, Cpu.Listener
         }
     }
     
-    // ActionListener
+    // PropertyChangeListener
     
     @Override
-    public void actionPerformed(ActionEvent e)
+    public void propertyChange(PropertyChangeEvent e)
     {
-        JComponent comp = (JComponent) e.getSource();
-        Cpu.Reg8 r = (Cpu.Reg8) comp.getClientProperty("reg");
-        byte b = (byte) Integer.parseInt(e.getActionCommand(), 16);
-        cpu.reg(r, b);
-    }
-    
-    // AncestorListener
-    
-    @Override
-    public void ancestorAdded(AncestorEvent e)
-    {
-    }
-    
-    @Override
-    public void ancestorMoved(AncestorEvent e)
-    {
-    }
-    
-    @Override
-    public void ancestorRemoved(AncestorEvent e)
-    {
-        cpu.remove(this);
+        if (e.getPropertyName().equals("value"))
+        {
+            JComponent comp = (JComponent) e.getSource();
+            Cpu.Reg8 r = (Cpu.Reg8) comp.getClientProperty("reg");
+            if (r != null)
+            {
+                byte b = (byte) (int) e.getNewValue();
+                cpu.reg(r, b);
+            }
+        }
     }
     
     // Cpu.Listener

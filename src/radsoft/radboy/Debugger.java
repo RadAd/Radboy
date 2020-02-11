@@ -231,7 +231,7 @@ public class Debugger
                         mwv.open();
                         break;
                     case "reg":
-                        Registers rv = new Registers(gb.cpu);
+                        Registers rv = new Registers(null, gb.cpu);
                         break;
                     };
                     break;
